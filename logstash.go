@@ -53,7 +53,7 @@ func (l *Logstash) Connect() (*net.TCPConn, error) {
 		l.Connection.SetLinger(0) // default -1
 		l.Connection.SetNoDelay(true)
 		l.Connection.SetKeepAlive(true)
-		l.Connection.SetKeepAlivePeriod(time.Duration(5) * time.Second)
+		l.Connection.SetKeepAlivePeriod(time.Duration(50) * time.Second)
 		l.SetTimeouts()
 	}
 	return connection, err
@@ -61,7 +61,9 @@ func (l *Logstash) Connect() (*net.TCPConn, error) {
 
 func (l *Logstash) Writeln(message string) (error) {
 	var err = errors.New("TCP Connection is nil.")
-	message = fmt.Sprintf("%s\n", message)
+	if len(message) == 0 || string(message[len(message)-1]) != "\n" {
+		message += "\n"
+	}
 	if l.Connection != nil {
 		_, err = l.Connection.Write([]byte(message))
 		if err != nil {
